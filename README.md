@@ -96,7 +96,7 @@ Recorder-only attributes:
 | `disabled` | Disables controls. Adding it cancels and releases any active capture. |
 | `download-name` | Download filename without extension. The appropriate extension is added. |
 
-Water deformation follows the mouse near the edge, bends the lens texture, and settles with a damped spring. The text and controls stay stable. Touch input does not start this hover effect. Reduced-motion preferences disable it.
+Water deformation follows the pointer near the edge, bends the lens texture, and settles with a damped spring. The text and controls stay stable. Touch drags create a local swell without blocking page scroll. Reduced-motion preferences disable it.
 
 ## Style with CSS
 

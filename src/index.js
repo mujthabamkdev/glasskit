@@ -212,7 +212,7 @@ export class LiquidGlass extends HTMLElementBase {
   }
 
   _onPointer(event) {
-    if (event.pointerType === 'touch' || this.hasAttribute('static') || matchMedia('(prefers-reduced-motion: reduce)').matches || !this._points?.length) return;
+    if (this.hasAttribute('static') || matchMedia('(prefers-reduced-motion: reduce)').matches || !this._points?.length) return;
     const rect = this.getBoundingClientRect();
     const x = event.clientX - rect.left, y = event.clientY - rect.top;
     const now = performance.now();
@@ -315,8 +315,10 @@ export class LiquidGlass extends HTMLElementBase {
     outline.setAttribute('width', w + 24); outline.setAttribute('height', h + 24);
     outline.setAttribute('viewBox', `0 0 ${w + 24} ${h + 24}`);
     outline.querySelectorAll('path').forEach((element) => element.setAttribute('d', path));
-    outline.querySelector('.meniscus-caustic').setAttribute('d', pathAtInset(Math.min(8, r * .2)));
-    outline.querySelector('.meniscus-sheen').setAttribute('d', pathAtInset(Math.min(2, r * .1)));
+    const caustic = this.shadowRoot.querySelector('.meniscus-caustic');
+    if (caustic) caustic.setAttribute('d', pathAtInset(Math.min(8, r * .2)));
+    const sheen = this.shadowRoot.querySelector('.meniscus-sheen');
+    if (sheen) sheen.setAttribute('d', pathAtInset(Math.min(2, r * .1)));
   }
 
   _createMap(width, height, requestedRadius) {
