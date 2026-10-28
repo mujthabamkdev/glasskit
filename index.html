@@ -77,6 +77,8 @@
     .card-live liquid-recorder{width:100%;max-width:320px;--recorder-height:120px;--recorder-time-size:46px;--recorder-button-size:80px}
     .card-live .card-live-label{margin-top:16px;font-size:12px;font-weight:600;color:#4338ca;letter-spacing:-0.01em}
     .card-live .card-live-sub{font-size:11px;color:#64748b;margin-top:4px;text-align:center}
+    .card-live .card-live-link{margin-top:10px;font-size:11px;font-weight:600;color:#4338ca;text-decoration:none;border:1px solid #c7d2fe;border-radius:999px;padding:6px 12px;transition:all .15s}
+    .card-live .card-live-link:hover{background:#4338ca;color:#fff;border-color:#4338ca}
 
     /* Footer */
     .site-footer{border-top:1px solid #eee;padding:32px 16px;font-size:12px;color:#888;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;max-width:1705px;margin:0 auto}
@@ -166,14 +168,13 @@
         a.innerHTML = `<img src="${p.img}" alt="${p.title}" loading="lazy"><div class="card-overlay"><p class="card-title">${p.title}</p><p class="card-meta">${p.meta}</p></div>`;
         grid.appendChild(a);
       });
-      // Insert the live liquid-recorder card as the 3rd item (only on "all"/"latest")
+      // Insert the live liquid-recorder card as the FIRST item (only on "all"/"latest")
       if (cat === 'all' || cat === 'latest') {
         const live = document.createElement('div');
         live.className = 'card card-live';
         live.style.aspectRatio = '4/3';
-        live.innerHTML = `<liquid-recorder demo blur="2" refraction="64" elasticity="1.35" download-name="glasskit-recording" style="--recorder-height:120px; --recorder-time-size:46px; --recorder-button-size:80px"></liquid-recorder><p class="card-live-label">Liquid Recorder</p><p class="card-live-sub">Record, listen, download. Live component.</p>`;
-        const third = grid.children[2];
-        if (third) grid.insertBefore(live, third); else grid.appendChild(live);
+        live.innerHTML = `<liquid-recorder demo blur="2" refraction="64" elasticity="1.35" download-name="glasskit-recording" style="--recorder-height:120px; --recorder-time-size:46px; --recorder-button-size:80px"></liquid-recorder><p class="card-live-label">Liquid Recorder</p><p class="card-live-sub">Record, listen, download. Live component.</p><a class="card-live-link" href="demo.html">View original full page ↗</a>`;
+        grid.insertBefore(live, grid.firstChild);
       }
     }
     render('all');
