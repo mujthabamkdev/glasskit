@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0b12">
+  <meta name="description" content="Glasskit — floating UI cards with vibrant grainient gradients for AI interfaces.">
+  <title>Glasskit — UI cards</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="icon" type="image/svg+xml" href="./assets/mark.svg">
+  <style>
+    :root{--font:'Inter',ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{font-family:var(--font);background:#0b0b12;color:#fff;overflow:hidden;-webkit-font-smoothing:antialiased}
+
+    .stage{position:relative;width:100vw;height:100vh;overflow:hidden;background:radial-gradient(ellipse at 30% 20%,#1a1a2e 0%,#0b0b12 60%)}
+
+    /* grainient background */
+    .grain{position:absolute;inset:0;pointer-events:none;opacity:.35;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");background-size:200px 200px}
+
+    /* floating cards */
+    .card{position:absolute;border-radius:20px;padding:20px 22px;width:260px;backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border:1px solid rgba(255,255,255,.18);box-shadow:0 20px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.25);transform:translate3d(0,0,0);animation:float 6s ease-in-out infinite}
+    .card .title{font-size:15px;font-weight:600;letter-spacing:-0.01em;margin-bottom:6px}
+    .card .body{font-size:12px;line-height:1.5;opacity:.85}
+    .card .row{display:flex;align-items:center;gap:8px;margin-top:12px}
+    .card .dot{width:8px;height:8px;border-radius:50%}
+    .card .tag{font-size:10px;opacity:.7;letter-spacing:.04em;text-transform:uppercase}
+
+    /* card variants with grainient gradients */
+    .c1{top:12%;left:8%;background:linear-gradient(135deg,#ff6b9d 0%,#c44569 40%,#833ab4 100%);animation-delay:0s}
+    .c2{top:20%;right:10%;background:linear-gradient(135deg,#f7971e 0%,#ffd200 50%,#f9ca24 100%);animation-delay:-1.5s;width:230px}
+    .c3{bottom:18%;left:14%;background:linear-gradient(135deg,#4facfe 0%,#00f2fe 60%,#43e97b 100%);animation-delay:-3s;width:240px}
+    .c4{bottom:12%;right:12%;background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%);animation-delay:-4.5s;width:250px}
+    .c5{top:46%;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#fa709a 0%,#fee140 100%);animation-delay:-2.2s;width:220px}
+
+    @keyframes float{
+      0%,100%{transform:translate3d(0,0,0)}
+      50%{transform:translate3d(0,-14px,0)}
+    }
+    .c5{animation:float 6s ease-in-out infinite}
+
+    /* center label */
+    .label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:0}
+    .label h1{font-size:clamp(28px,5vw,48px);font-weight:700;letter-spacing:-0.03em;margin-bottom:8px;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .label p{font-size:14px;color:rgba(255,255,255,.6);max-width:420px;margin:0 auto;line-height:1.5}
+
+    /* grain overlay on cards */
+    .card::after{content:'';position:absolute;inset:0;border-radius:20px;pointer-events:none;opacity:.25;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");background-size:120px 120px}
+
+    /* back link */
+    .back{position:fixed;bottom:24px;left:24px;font-size:12px;color:rgba(255,255,255,.6);text-decoration:none;border:1px solid rgba(255,255,255,.15);padding:8px 14px;border-radius:999px;backdrop-filter:blur(8px);transition:all .15s;z-index:10}
+    .back:hover{color:#fff;border-color:rgba(255,255,255,.4)}
+
+    @media(max-width:640px){
+      .card{width:200px;padding:16px 18px}
+      .card .title{font-size:13px}
+      .card .body{font-size:11px}
+      .c5{display:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="grain"></div>
+
+    <div class="label">
+      <h1>UI Cards</h1>
+      <p>Floating UI cards with vibrant Grainient gradients for AI interfaces.</p>
+    </div>
+
+    <div class="card c1">
+      <div class="title">AI Assistant</div>
+      <div class="body">How can I help you today? Ask me anything about your workflow.</div>
+      <div class="row"><span class="dot" style="background:#fff"></span><span class="tag">Online</span></div>
+    </div>
+    <div class="card c2">
+      <div class="title">Quick Actions</div>
+      <div class="body">Summarize, translate, or rewrite any text in seconds.</div>
+      <div class="row"><span class="dot" style="background:#fff"></span><span class="tag">Ready</span></div>
+    </div>
+    <div class="card c3">
+      <div class="title">Insights</div>
+      <div class="body">Your weekly digest is ready. 12 new items to review.</div>
+      <div class="row"><span class="dot" style="background:#fff"></span><span class="tag">New</span></div>
+    </div>
+    <div class="card c4">
+      <div class="title">Smart Search</div>
+      <div class="body">Find anything across your workspace with natural language.</div>
+      <div class="row"><span class="dot" style="background:#fff"></span><span class="tag">Beta</span></div>
+    </div>
+    <div class="card c5">
+      <div class="title">Notifications</div>
+      <div class="body">3 unread messages from your team.</div>
+      <div class="row"><span class="dot" style="background:#fff"></span><span class="tag">3 new</span></div>
+    </div>
+
+    <a class="back" href="/">← Back to Glasskit</a>
+  </div>
+</body>
+</html>
