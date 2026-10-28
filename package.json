@@ -1,0 +1,18 @@
+{
+  "name": "@glasskit/elements",
+  "version": "0.1.0",
+  "description": "Dependency-free liquid glass surfaces and audio recorder Web Components.",
+  "type": "module",
+  "sideEffects": true,
+  "main": "./dist/liquid-glass.js",
+  "types": "./dist/liquid-glass.d.ts",
+  "exports": { ".": { "types": "./dist/liquid-glass.d.ts", "default": "./dist/liquid-glass.js" } },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "engines": { "node": ">=18" },
+  "license": "MIT"
+}

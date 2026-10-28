@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Glasskit — standalone integration</title>
+<script defer src="../dist/liquid-glass.global.js"></script>
+<style>
+  body { margin:0; min-height:100vh; display:grid; place-content:center; gap:40px; padding:30px; background:radial-gradient(ellipse at 15% 15%,#edb99c,transparent 55%),radial-gradient(ellipse at 85% 85%,#a895da,transparent 55%),linear-gradient(140deg,#415f7c,#97b4c9); font:15px system-ui; color:#fff; }
+  liquid-glass { max-width:500px; }
+  .card { padding:30px; }
+  h1 { font-weight:400; letter-spacing:-1px; }
+  p { line-height:1.7; }
+  liquid-recorder { width:500px; max-width:100%; }
+  small { text-align:center; opacity:.75; }
+</style>
+<liquid-glass radius="30" blur="3" refraction="60" elasticity="1.5"><div class="card"><h1>A surface for anything.</h1><p>Move the mouse near the edge. Add your own HTML inside the component. Its styling stays contained.</p></div></liquid-glass>
+<liquid-recorder demo refraction="60" elasticity="1.5"></liquid-recorder>
+<small>This example uses demo recording. Remove “demo” on an HTTPS website to capture audio.</small>
+</html>
