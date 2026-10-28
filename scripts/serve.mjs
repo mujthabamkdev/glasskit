@@ -9,7 +9,14 @@ const types = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/ja
 const server = createServer(async (req, res) => {
   try {
     const path = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-    const file = resolve(root, `.${path === '/' ? '/index.html' : path}`);
+    let file = resolve(root, `.${path === '/' ? '/index.html' : path}`);
+    // Support clean URLs locally: /demo -> /demo.html
+    try { await readFile(file); } catch {
+      if (!extname(file)) {
+        const htmlFile = file + '.html';
+        try { await readFile(htmlFile); file = htmlFile; } catch {}
+      }
+    }
     if (!file.startsWith(root.endsWith(sep) ? root : root + sep)) {
       res.writeHead(403).end('Forbidden');
       return;
