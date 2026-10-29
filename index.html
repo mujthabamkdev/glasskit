@@ -13,6 +13,10 @@
   <script defer src="./dist/liquid-glass.global.js"></script>
   <script type="module" src="/src/ui-cards.js"></script>
   <script type="module" src="/src/glass-slider.js"></script>
+  <script type="module" src="/src/postage-stamps.js"></script>
+  <script type="module" src="/src/platinum-visa-card.js"></script>
+  <script type="module" src="/src/plasma-app.js"></script>
+  <script type="module" src="/src/portfolio-website.js"></script>
   <style>
     :root{--font-inter:'Inter',ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:light}
     *{box-sizing:border-box}
@@ -62,10 +66,11 @@
     .filter.active{background:#262626;color:#fff;border-color:#262626}
 
     /* Masonry grid */
-    .grid{columns:1;column-gap:14px;max-width:1705px;margin:0 auto;padding:0 16px 64px}
-    @media(min-width:640px){.grid{columns:2;padding:0 20px 64px}}
-    @media(min-width:900px){.grid{columns:3}}
-    @media(min-width:1280px){.grid{columns:3;padding:0 24px 64px}}
+    .grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start;max-width:1705px;margin:0 auto;padding:0 16px 64px}
+    .grid-column{min-width:0}
+    @media(min-width:640px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:0 20px 64px}}
+    @media(min-width:900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(min-width:1280px){.grid{padding:0 24px 64px}}
     @media(min-width:1700px){.grid{padding:0 46px 64px}}
     .card{break-inside:avoid;margin-bottom:14px;display:block;border-radius:12px;overflow:hidden;background:#f0f0f0;position:relative}
     .card img{width:100%;height:auto;display:block}
@@ -92,6 +97,14 @@
     .ui-card-footer a{font-size:11px;color:#68747e}
     .ui-card-footer a:hover{color:#111}
     .ui-card-footer a:focus-visible{outline:2px solid #626d7d;outline-offset:4px}
+    .card-postage{background:#f7f7f7;color:#53606b}
+    .card-postage postage-stamps-scene{width:100%}
+    .card-visa{background:#f7f7f8;color:#53606b}
+    .card-visa platinum-visa-card-scene{width:100%}
+    .card-plasma{background:#f5f5f5;color:#53606b}
+    .card-plasma plasma-app-scene{width:100%}
+    .card-portfolio{background:#deeffb;color:#53606b}
+    .card-portfolio portfolio-website-scene{width:100%}
 
     /* Footer */
     .site-footer{border-top:1px solid #eee;padding:32px 16px;font-size:12px;color:#888;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;max-width:1705px;margin:0 auto}
@@ -164,6 +177,7 @@
     ];
 
     const grid = document.getElementById('grid');
+    let galleryCards = [];
     function render(cat) {
       grid.innerHTML = '';
       const filtered = cat === 'all' || cat === 'latest' ? posts : posts.filter(p => p.cat === cat);
@@ -173,6 +187,7 @@
         a.className = 'card';
         a.href = p.href ? p.href : '#';
         a.style.aspectRatio = p.ratio;
+        a.dataset.ratio = p.ratio;
         a.innerHTML = `<img src="${p.img}" alt="${p.title}" loading="lazy"><div class="card-overlay"><p class="card-title">${p.title}</p><p class="card-meta">${p.meta}</p></div>`;
         grid.appendChild(a);
       });
@@ -197,6 +212,66 @@
         sliderCard.innerHTML = `<glass-slider-scene preview aria-label="Live glass slider preview"></glass-slider-scene><div class="ui-card-footer"><h2>Glass slider experiment</h2><a href="/glass-slider">View full page ↗</a></div>`;
         grid.insertBefore(sliderCard, cat === 'product' ? grid.firstChild : grid.children[2]);
       }
+      if (cat === 'all' || cat === 'latest' || cat === 'print') {
+        const stamps = document.createElement('article');
+        stamps.className = 'card card-postage';
+        stamps.dataset.ratio = '1/1';
+        stamps.innerHTML = `<postage-stamps-scene preview aria-label="Live postage stamps preview"></postage-stamps-scene><div class="ui-card-footer"><h2>Postage Stamps</h2><a href="/postage-stamps">View full page ↗</a></div>`;
+        grid.insertBefore(stamps, grid.querySelector('.card:not([class*="card-live"])'));
+      }
+      if (cat === 'all' || cat === 'latest' || cat === 'illustration') {
+        const visa = document.createElement('article');
+        visa.className = 'card card-visa';
+        visa.dataset.ratio = '4/3';
+        visa.innerHTML = `<platinum-visa-card-scene preview aria-label="Live platinum Visa card preview"></platinum-visa-card-scene><div class="ui-card-footer"><h2>Platinum Visa Card</h2><a href="/platinum-visa-card">View full page ↗</a></div>`;
+        const stamps = grid.querySelector('.card-postage');
+        grid.insertBefore(visa, stamps ? stamps.nextSibling : grid.querySelector('.card:not([class*="card-live"])'));
+      }
+      if (cat === 'all' || cat === 'latest' || cat === 'product') {
+        const plasma = document.createElement('article');
+        plasma.className = 'card card-plasma';
+        plasma.dataset.ratio = '1/1';
+        plasma.innerHTML = `<plasma-app-scene preview autoplay aria-label="Live Plasma app demo wallet"></plasma-app-scene><div class="ui-card-footer"><h2>Plasma App</h2><a href="/plasma-app">View full page ↗</a></div>`;
+        const previous = grid.querySelector('.card-visa') || grid.querySelector('.card-postage');
+        grid.insertBefore(plasma, previous ? previous.nextSibling : grid.querySelector('.card:not([class*="card-live"])'));
+      }
+      if (cat === 'all' || cat === 'latest' || cat === 'web') {
+        const portfolio = document.createElement('article');
+        portfolio.className = 'card card-portfolio';
+        portfolio.dataset.ratio = '8/5';
+        portfolio.innerHTML = `<portfolio-website-scene preview autoplay aria-label="Live interactive garment portfolio"></portfolio-website-scene><div class="ui-card-footer"><h2>Portfolio Website</h2><a href="/portfolio-website">View full page ↗</a></div>`;
+        const previous = grid.querySelector('.card-plasma') || grid.querySelector('.card-visa') || grid.querySelector('.card-postage');
+        grid.insertBefore(portfolio, previous ? previous.nextSibling : grid.querySelector('.card:not([class*="card-live"])'));
+      }
+      galleryCards = [...grid.children];
+      layoutCards();
+    }
+
+    // Explicit masonry lanes keep scenes together and new components in lane two.
+    function layoutCards() {
+      const cards = galleryCards;
+      const count = window.matchMedia('(min-width:900px)').matches ? 3 : window.matchMedia('(min-width:640px)').matches ? 2 : 1;
+      const columns = Array.from({ length: count }, () => {
+        const column = document.createElement('div');
+        column.className = 'grid-column';
+        return column;
+      });
+      const heights = Array(count).fill(0);
+      const width = (grid.clientWidth - parseFloat(getComputedStyle(grid).paddingLeft) * 2 - 14 * (count - 1)) / count;
+      cards.forEach(card => {
+        const featured = card.classList.contains('card-live') || card.classList.contains('card-live-ui') || card.classList.contains('card-live-slider');
+        const secondLane = card.classList.contains('card-postage') || card.classList.contains('card-visa');
+        const thirdLane = card.classList.contains('card-plasma') || card.classList.contains('card-portfolio');
+        const lane = count === 1 || featured ? 0 : secondLane ? 1 : thirdLane ? Math.min(2, count - 1) : heights.indexOf(Math.min(...heights));
+        columns[lane].appendChild(card);
+        const [w, h] = (card.dataset.ratio || (card.classList.contains('card-live-ui') ? '5/4' : '1/1')).split('/').map(Number);
+        const height = card.classList.contains('card-live') ? 300 : width * h / w;
+        heights[lane] += height + (featured || secondLane || thirdLane ? 44 : 0) + 14;
+      });
+      grid.replaceChildren(...columns);
+    }
+    for (const query of ['(min-width:640px)', '(min-width:900px)']) {
+      window.matchMedia(query).addEventListener('change', layoutCards);
     }
     render('all');
 

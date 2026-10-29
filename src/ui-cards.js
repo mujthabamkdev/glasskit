@@ -161,6 +161,19 @@ function illustration(ctx, kind, time) {
 }
 
 class UICardsScene extends HTMLElement {
+  static get observedAttributes() { return ['refraction', 'blur', 'elasticity', 'glow']; }
+
+  attributeChangedCallback(name, oldValue, value) {
+    if (oldValue === value) return;
+    const [fallback, min, max] = { refraction:[36,0,100], blur:[0,0,24], elasticity:[1,0,2], glow:[70,0,100] }[name];
+    const number = value === null || value.trim() === '' ? fallback : Number(value);
+    this[`_${name}`] = Number.isFinite(number) ? Math.max(min, Math.min(max, number)) : fallback;
+    if (this._connected && this._canvas) {
+      this._lastTextures = -Infinity;
+      this._draw(performance.now());
+    }
+  }
+
   connectedCallback() {
     if (this._connected) return;
     this._connected = true;
@@ -244,6 +257,22 @@ class UICardsScene extends HTMLElement {
     });
   }
 
+  reset() {
+    if (!this._connected) return;
+    this._stop();
+    this._index = this._next = 0;
+    this._paused = this._moving = false;
+    this._pointerX = this._visualTime = undefined;
+    this._lastTextures = -Infinity;
+    const panel = panels[0];
+    this._canvas.setAttribute('aria-label', `${panel.title}: ${panel.subtitle}. Use left and right arrow keys to browse.`);
+    this.shadowRoot.querySelector('.count').textContent = '1 / 5';
+    this.shadowRoot.querySelector('.sr-only').textContent = `${panel.title}. ${panel.subtitle}.`;
+    this._syncPause();
+    this._draw(performance.now());
+    this._start();
+  }
+
   _syncPause() {
     const paused = this._paused || this._motion.matches;
     const button = this.shadowRoot.querySelector('.pause');
@@ -279,13 +308,14 @@ class UICardsScene extends HTMLElement {
     const fragment = shader(gl.FRAGMENT_SHADER, `
       precision mediump float;
       uniform sampler2D u_texture;
+      uniform float u_refraction;
       varying vec2 v_uv;
       void main(){
         vec2 p=abs(v_uv*vec2(314.0,396.0)-vec2(157.0,198.0))-vec2(140.0,181.0);
         float distance=length(max(p,0.0))+min(max(p.x,p.y),0.0)-17.0;
         float alpha=1.0-smoothstep(-.75,.75,distance);
         vec3 color=texture2D(u_texture,v_uv).rgb;
-        float rim=smoothstep(-2.3,-.5,distance)*.28;
+        float rim=smoothstep(-2.3,-.5,distance)*.28*(u_refraction/36.0);
         color=mix(color,vec3(1.0),rim);
         gl_FragColor=vec4(color,alpha);
       }
@@ -311,7 +341,7 @@ class UICardsScene extends HTMLElement {
     const attribute = gl.getAttribLocation(this._program, 'a_uv');
     gl.enableVertexAttribArray(attribute);
     gl.vertexAttribPointer(attribute, 2, gl.FLOAT, false, 0, 0);
-    this._uniforms = Object.fromEntries(['x','scale','angle','curl','texture'].map(name => [name, gl.getUniformLocation(this._program, `u_${name}`)]));
+    this._uniforms = Object.fromEntries(['x','scale','angle','curl','texture','refraction'].map(name => [name, gl.getUniformLocation(this._program, `u_${name}`)]));
     gl.uniform1i(this._uniforms.texture, 0);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -339,7 +369,11 @@ class UICardsScene extends HTMLElement {
     this._textures.forEach((texture, index) => {
       const { ctx } = texture;
       const panel = panels[index];
-      ctx.drawImage(this._backs[index], 0, 0, 768, 960);
+      const frost = this._blur ?? 0;
+      ctx.save();
+      ctx.filter = `blur(${frost}px) saturate(${(this._glow ?? 70) / 70})`;
+      ctx.drawImage(this._backs[index], -frost * 2, -frost * 2, 768 + frost * 4, 960 + frost * 4);
+      ctx.restore();
       illustration(ctx, panel.kind, time);
       ctx.fillStyle = '#fff';
       ctx.font = '500 40px Inter, system-ui, sans-serif';
@@ -407,9 +441,13 @@ class UICardsScene extends HTMLElement {
     const gl = this._gl;
     gl.clearColor(.949, .961, .965, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(this._uniforms.refraction, this._refraction ?? 36);
     current.forEach(panel => {
       gl.bindTexture(gl.TEXTURE_2D, this._textures[panel.index].gl);
-      for (const key of ['x','scale','angle','curl']) gl.uniform1f(this._uniforms[key], panel[key]);
+      gl.uniform1f(this._uniforms.x, panel.x);
+      gl.uniform1f(this._uniforms.scale, panel.scale);
+      gl.uniform1f(this._uniforms.angle, panel.angle * (this._elasticity ?? 1));
+      gl.uniform1f(this._uniforms.curl, panel.curl * (this._refraction ?? 36) / 36 * (this._elasticity ?? 1));
       gl.drawArrays(gl.TRIANGLES, 0, this._vertexCount);
     });
     if (progress === 1) this._moving = false;

@@ -1,31 +1,35 @@
 (() => {
-  const recorder = document.querySelector('#hero-recorder');
+  const component = document.querySelector('[data-preview]');
+  const recorder = component?.localName === 'liquid-recorder' ? component : null;
   const hero = document.querySelector('.hero');
   const modeLabel = document.querySelector('#mode-label');
   const previewNote = document.querySelector('#preview-note');
   const micButton = document.querySelector('#enable-mic');
   const restartButton = document.querySelector('#restart-preview');
 
-  if (!recorder) return;
+  if (!component) return;
 
   const bloom = (amount) => `radial-gradient(ellipse at 32% 110%,rgb(255 174 96 / ${amount}),transparent 47%),radial-gradient(ellipse at 58% 110%,rgb(233 130 255 / ${amount * .85}),transparent 45%),radial-gradient(ellipse at 83% 115%,rgb(100 182 255 / ${amount}),transparent 50%),linear-gradient(160deg,rgb(255 255 255 / .2),transparent 43%)`;
 
-  micButton.addEventListener('click', async () => {
-    if (recorder.hasAttribute('demo')) recorder.removeAttribute('demo');
-    modeLabel.textContent = 'MICROPHONE MODE';
-    previewNote.textContent = 'Audio stays in this browser. Nothing is uploaded.';
-    await recorder.start();
-  });
-  recorder.addEventListener('record-start', ({ detail }) => {
-    if (!detail.demo) { micButton.querySelector('span').textContent = 'Microphone is recording'; micButton.disabled = true; }
-  });
-  recorder.addEventListener('record-stop', ({ detail }) => {
-    if (!detail.demo) { micButton.querySelector('span').textContent = 'Record another take'; micButton.disabled = false; }
-  });
-  recorder.addEventListener('record-error', () => {
-    micButton.querySelector('span').textContent = 'Try your microphone'; micButton.disabled = false;
-  });
+  if (recorder) {
+    micButton.addEventListener('click', async () => {
+      if (recorder.hasAttribute('demo')) recorder.removeAttribute('demo');
+      modeLabel.textContent = 'MICROPHONE MODE';
+      previewNote.textContent = 'Audio stays in this browser. Nothing is uploaded.';
+      await recorder.start();
+    });
+    recorder.addEventListener('record-start', ({ detail }) => {
+      if (!detail.demo) { micButton.querySelector('span').textContent = 'Microphone is recording'; micButton.disabled = true; }
+    });
+    recorder.addEventListener('record-stop', ({ detail }) => {
+      if (!detail.demo) { micButton.querySelector('span').textContent = 'Record another take'; micButton.disabled = false; }
+    });
+    recorder.addEventListener('record-error', () => {
+      micButton.querySelector('span').textContent = 'Try your microphone'; micButton.disabled = false;
+    });
+  }
   restartButton.addEventListener('click', () => {
+    if (!recorder) { component.reset(); return; }
     recorder.reset(); recorder.setAttribute('demo', '');
     modeLabel.textContent = 'LIVE PREVIEW'; previewNote.textContent = 'A visual preview. Your microphone is off.';
     micButton.querySelector('span').textContent = 'Try your microphone'; micButton.disabled = false;
@@ -43,8 +47,10 @@
   function toggleTuning(open) {
     tuningPanel.hidden = !open; tuneButton.setAttribute('aria-expanded', String(open));
     if (open) {
-      const renderer = recorder.shadowRoot.querySelector('liquid-glass').dataset.renderer;
-      document.querySelector('#renderer-note').textContent = renderer === 'refraction' ? 'EDGE REFRACTION + BACKDROP BLUR' : 'COMPATIBLE BACKDROP BLUR';
+      if (recorder) {
+        const renderer = recorder.shadowRoot.querySelector('liquid-glass').dataset.renderer;
+        document.querySelector('#renderer-note').textContent = renderer === 'refraction' ? 'EDGE REFRACTION + BACKDROP BLUR' : 'COMPATIBLE BACKDROP BLUR';
+      }
       document.querySelector('#refraction').focus();
     } else tuneButton.focus();
   }
@@ -55,12 +61,13 @@
     const input = document.querySelector(`#${name}`);
     input.addEventListener('input', () => {
       document.querySelector(`#${name}-value`).value = input.value;
-      if (name === 'glow') recorder.style.setProperty('--glass-light', bloom(Number(input.value) / 100));
-      else recorder.setAttribute(name, input.value);
+      if (name === 'glow' && recorder) recorder.style.setProperty('--glass-light', bloom(Number(input.value) / 100));
+      else component.setAttribute(name, input.value);
     });
   }
   document.querySelector('#reset-tuning').addEventListener('click', () => {
-    for (const [name, value] of Object.entries({ refraction: 64, blur: 2, elasticity: 1.35, glow: 70 })) {
+    for (const name of ['refraction', 'blur', 'elasticity', 'glow']) {
+      const value = document.querySelector(`#${name}`).defaultValue;
       const input = document.querySelector(`#${name}`); input.value = value; input.dispatchEvent(new Event('input'));
     }
   });
@@ -73,10 +80,17 @@
   });
   document.querySelector('#shuffle-surface').addEventListener('click', () => document.querySelector('.surface-showcase').classList.toggle('alternate'));
 
-  const snippets = {
+  const recorderSnippets = {
     html: `<script type="module" src="/liquid-glass.js"></script>\n\n<!-- A surface for your own content -->\n<liquid-glass radius="24" blur="5">\n  <div style="padding: 24px">Hello, glass.</div>\n</liquid-glass>\n\n<!-- A complete audio recorder -->\n<liquid-recorder></liquid-recorder>`,
     react: `import './liquid-glass.js';\n\nexport default function App() {\n  return (\n    <>\n      <liquid-glass radius="24" blur="5">\n        <div style={{ padding: 24 }}>Hello, glass.</div>\n      </liquid-glass>\n      <liquid-recorder />\n    </>\n  );\n}`,
     vue: `<script setup>\nimport './liquid-glass.js';\n</script>\n\n<template>\n  <liquid-glass radius="24" blur="5">\n    <div style="padding: 24px">Hello, glass.</div>\n  </liquid-glass>\n  <liquid-recorder />\n</template>\n<!-- Configure isCustomElement; see the guide. -->`
+  };
+  const tag = component.localName;
+  const moduleName = tag.replace(/-scene$/, '');
+  const snippets = recorder ? recorderSnippets : {
+    html: `<script type="module" src="/${moduleName}.js"></script>\n\n<!-- An interactive scene, ready for your page -->\n<${tag}\n  refraction="36" blur="0"\n  elasticity="1" glow="70">\n</${tag}>`,
+    react: `import './${moduleName}.js';\n\nexport default function App() {\n  return (\n    <${tag}\n      refraction="36" blur="0"\n      elasticity="1" glow="70" />\n  );\n}`,
+    vue: `<script setup>\nimport './${moduleName}.js';\n</script>\n\n<template>\n  <${tag}\n    refraction="36" blur="0"\n    elasticity="1" glow="70" />\n</template>\n<!-- Configure isCustomElement; see the guide. -->`
   };
   let language = 'html';
   function renderCode(next) {

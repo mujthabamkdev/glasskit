@@ -24,7 +24,7 @@ const styles = `
   .count{min-width:30px;text-align:center;font-variant-numeric:tabular-nums}
   :host([preview]) .controls{display:none}
   .fallback{display:none;position:absolute;inset:0;overflow:hidden;pointer-events:none}
-  .fallback i{position:absolute;top:25%;left:50%;width:32%;aspect-ratio:1;border-radius:50%;box-shadow:inset 2px 3px 3px #ffffffcc,inset -3px -5px 8px #2e435788;background:radial-gradient(ellipse at 33% 27%,#fff 0%,#ffffff00 27%),conic-gradient(from 45deg,#698095,#f8e8cf,#7e594a,#e9f1f5,#3b5975,#698095)}
+  .fallback i{position:absolute;top:25%;left:50%;width:32%;aspect-ratio:1;border-radius:50%;box-shadow:inset 2px 3px 3px rgb(255 255 255 / var(--orb-rim,.8)),inset -3px -5px 8px #2e435788;background:radial-gradient(ellipse at 33% 27%,#fff 0%,#ffffff00 27%),conic-gradient(from 45deg,#698095,#f8e8cf,#7e594a,#e9f1f5,#3b5975,#698095)}
   .fallback i:nth-child(2){background:radial-gradient(ellipse at 30% 25%,#fff,#ffffff00 30%),conic-gradient(#d5f3fa,#246d81,#ecf8f9,#478592,#e4f3f7,#d5f3fa)}
   .fallback i:nth-child(3){background:conic-gradient(#e5d8f9,#ea887d,#273d75,#e9d7fb,#c66283,#e5d8f9)}
   .fallback i:nth-child(4){background:conic-gradient(#ccef83,#173e05,#91bf3d,#153808,#ccef83);border-radius:45% 65% 45% 70%}
@@ -50,6 +50,7 @@ const fragmentSource = `
   precision highp float;
   varying vec2 v_uv;
   uniform float u_kind, u_time, u_flow, u_direction, u_recoil, u_extent, u_pixel;
+  uniform float u_refraction, u_frost, u_glow;
   mat2 rotate(float a){return mat2(cos(a),-sin(a),sin(a),cos(a));}
   float noise(vec3 p){
     vec3 cell=floor(p), f=fract(p);
@@ -177,7 +178,7 @@ const fragmentSource = `
     float facing=max(0.0,dot(n,-ray));
     float fresnel=pow(1.0-facing,3.0);
     vec3 reflected=studio(reflection);
-    vec3 insideRay=normalize(refract(ray,n,.69));
+    vec3 insideRay=normalize(refract(ray,n,clamp(1.0-u_refraction*(.31/36.0),.35,1.0)));
     vec3 entrance=liquidSpace(p)+insideRay*.035;
     vec3 interior=entrance;
     float depth=0.0;
@@ -211,6 +212,8 @@ const fragmentSource = `
     vec3 dispersion=.5+.5*sin(vec3(0.0,2.1,4.2)+facing*31.0);
     color+=dispersion*fresnel*.025;
     color=mix(color,vec3(.95,.98,1.0),fresnel*.11);
+    color=mix(vec3(dot(color,vec3(.2126,.7152,.0722))),color,u_glow/70.0);
+    color=mix(color,mix(vec3(.9,.94,.97),body,.15),u_frost*.65);
     float silhouette=shape(vec3(uv,0.0))/.52;
     float alpha=1.0-smoothstep(-u_pixel,u_pixel,silhouette);
     gl_FragColor=vec4(color,alpha);
@@ -218,6 +221,25 @@ const fragmentSource = `
 `;
 
 class GlassSliderScene extends HTMLElement {
+  static get observedAttributes() { return ['refraction', 'blur', 'elasticity', 'glow']; }
+
+  attributeChangedCallback(name, oldValue, value) {
+    if (oldValue === value) return;
+    const [fallback, min, max] = { refraction:[36,0,100], blur:[0,0,24], elasticity:[1,0,2], glow:[70,0,100] }[name];
+    const number = value === null || value.trim() === '' ? fallback : Number(value);
+    this[`_${name}`] = Number.isFinite(number) ? Math.max(min, Math.min(max, number)) : fallback;
+    if (this._connected && this._canvas) {
+      this._applyAppearance();
+      this._draw(performance.now());
+    }
+  }
+
+  _applyAppearance() {
+    const fallback = this.shadowRoot.querySelector('.fallback');
+    fallback.style.filter = `blur(${(this._blur ?? 0) / 8}px) saturate(${(this._glow ?? 70) / 70})`;
+    fallback.style.setProperty('--orb-rim', Math.min(1, .2 + (this._refraction ?? 36) / 60));
+  }
+
   connectedCallback() {
     if (this._connected) return;
     this._connected = true;
@@ -236,6 +258,7 @@ class GlassSliderScene extends HTMLElement {
     const root = this.shadowRoot || this.attachShadow({ mode:'open' });
     root.innerHTML = `<style>${styles}</style><div class="scene"><div class="phone"><div class="speaker"></div><div class="status" aria-hidden="true"><span>9:41</span><div class="status-icons"><svg viewBox="0 0 20 16"><path d="M1 11h3v5H1zm5-3h3v8H6zm5-4h3v12h-3zm5-4h3v16h-3z"/></svg><svg viewBox="0 0 20 16"><path d="M1 5a14 14 0 0 1 18 0l-2 2a11 11 0 0 0-14 0zm4 4a8 8 0 0 1 10 0l-2 2a5 5 0 0 0-6 0zm3 4a3 3 0 0 1 4 0l-2 3z"/></svg><svg viewBox="0 0 24 16"><rect x="1" y="3" width="19" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="5" width="15" height="6" rx="1"/><path d="M22 6v4h1V6z"/></svg></div></div><div class="eyebrow"><span class="badge">COD1</span><span>Frontier meets reality</span></div><div class="orb-area"><canvas tabindex="0" role="slider" aria-label="Glass orb slider" aria-orientation="horizontal" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1" aria-valuetext="Pearl glass"></canvas><div class="fallback" aria-hidden="true">${materials.map(() => '<i></i>').join('')}</div></div><p class="copy">Our team has helped build companies like Meta AI, Nvidia, Cruise, Scale, and Cohere.</p><p class="copy secondary">Help create a powerful new way to understand visual data. We share a vision of what AI can do and we’re transforming the way people use video for good.</p></div><div class="controls"><button class="previous" aria-label="Previous glass orb">←</button><span class="count">1 / 5</span><button class="next" aria-label="Next glass orb">→</button><button class="pause" aria-label="Pause animation">Ⅱ</button></div></div>`;
     this._canvas = root.querySelector('canvas');
+    this._applyAppearance();
     this._gl = this._canvas.getContext('webgl', { alpha:true, antialias:true });
     if (this._gl) this._setupGL();
     else root.querySelector('.orb-area').classList.add('no-webgl');
@@ -296,6 +319,20 @@ class GlassSliderScene extends HTMLElement {
     this._size();
   }
 
+  reset() {
+    if (!this._connected) return;
+    this._stop();
+    this._index = this._position = this._flow = this._recoil = this._next = 0;
+    this._paused = this._moving = false;
+    this._pointerX = undefined;
+    this._canvas.setAttribute('aria-valuenow', '1');
+    this._canvas.setAttribute('aria-valuetext', materials[0]);
+    this.shadowRoot.querySelector('.count').textContent = '1 / 5';
+    this._syncPause();
+    this._draw(performance.now());
+    this._start();
+  }
+
   _syncPause() {
     const paused = this._paused || this._motion.matches;
     const button = this.shadowRoot.querySelector('.pause');
@@ -329,7 +366,7 @@ class GlassSliderScene extends HTMLElement {
     const attribute = gl.getAttribLocation(this._program, 'a_uv');
     gl.enableVertexAttribArray(attribute);
     gl.vertexAttribPointer(attribute, 2, gl.FLOAT, false, 0, 0);
-    this._uniforms = Object.fromEntries(['resolution','center','size','kind','time','flow','direction','recoil','extent','pixel'].map(name => [name, gl.getUniformLocation(this._program, `u_${name}`)]));
+    this._uniforms = Object.fromEntries(['resolution','center','size','kind','time','flow','direction','recoil','extent','pixel','refraction','frost','glow'].map(name => [name, gl.getUniformLocation(this._program, `u_${name}`)]));
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   }
@@ -386,13 +423,16 @@ class GlassSliderScene extends HTMLElement {
       gl.uniform1f(this._uniforms.size, this._canvas.width*.44);
       gl.uniform1f(this._uniforms.time, this._time);
       gl.uniform1f(this._uniforms.direction, this._direction);
-      gl.uniform1f(this._uniforms.recoil, this._recoil);
+      gl.uniform1f(this._uniforms.recoil, this._recoil * (this._elasticity ?? 1));
       gl.uniform1f(this._uniforms.pixel,2.65/(this._canvas.width*.44));
+      gl.uniform1f(this._uniforms.refraction, this._refraction ?? 36);
+      gl.uniform1f(this._uniforms.frost, (this._blur ?? 0) / 24);
+      gl.uniform1f(this._uniforms.glow, this._glow ?? 70);
     }
     materials.forEach((_, index) => {
       let offset = ((index - this._position + 2.5) % 5 + 5) % 5 - 2.5;
       const center = .5 + offset * .39;
-      const flow = this._flow*(index === this._index ? 1 : .34);
+      const flow = Math.min(1.08, this._flow * (this._elasticity ?? 1))*(index === this._index ? 1 : .34);
       if (gl && center > -.5 && center < 1.5) {
         gl.uniform1f(this._uniforms.center, center * this._canvas.width);
         gl.uniform1f(this._uniforms.kind, index);

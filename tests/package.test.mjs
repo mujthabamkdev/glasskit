@@ -17,8 +17,8 @@ test('classic bundle registers both components without module imports and can be
   assert.equal(context.Glasskit.formatTime(18000), '00:18');
 });
 
-test('local-file demo uses classic scripts and all first-party resources exist', async () => {
-  const html = await readFile(new URL('index.html', root), 'utf8');
+test('local-file recorder demo uses classic scripts and all first-party resources exist', async () => {
+  const html = await readFile(new URL('demo.html', root), 'utf8');
   assert.doesNotMatch(html, /<script[^>]*type="module"/);
   const assets = [...html.matchAll(/(?:src|href)="(\.\/[^"#]+)"/g)].map((match) => match[1]);
   for (const asset of assets) await access(new URL(asset, root));

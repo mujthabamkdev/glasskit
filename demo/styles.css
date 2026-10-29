@@ -10,6 +10,28 @@
 @media(max-width:640px){.site-header{height:64px;padding:0 22px}.brand{font-size:23px}.brand svg{width:26px;height:26px}.site-header nav{gap:20px;font-size:10px}.site-header nav span{display:none}.hero{height:auto;min-height:770px}.hero-topline{padding:24px 23px 0;font-size:7px;letter-spacing:1px}.hero-topline>span:last-child{display:none}.hero-content{margin:88px auto 150px;padding:0 21px 100px}.eyebrow{font-size:7px;letter-spacing:1.2px}.tiny-spark{font-size:16px}h1{font-size:47px;letter-spacing:-2.8px;margin-top:20px}.hero-description{font-size:11px}.recorder-stage{margin-top:49px}.component-caption{font-size:7px;letter-spacing:1px;margin:0 18px 13px}.recorder-stage liquid-recorder{--recorder-height:130px;--recorder-button-size:85px;--recorder-time-size:48px}.under-recorder{margin:14px 12px 0;font-size:8px}.text-button{font-size:8px}.hero-actions{margin-top:28px;gap:9px}.primary-button,.secondary-button{height:43px;font-size:10px;padding:0 15px}.hero-bottomline{left:23px;right:23px;bottom:28px}.bottom-label{font-size:6px;letter-spacing:.8px}.hero-bottomline p{max-width:150px;font-size:9px;line-height:1.5;margin-top:7px}.scene-thumb{width:39px;height:29px}.scene-buttons{gap:7px;margin-top:10px}.tune-button{height:29px;width:29px;margin-left:1px}.tune-button svg{width:16px;height:16px}.tuning-panel{right:23px;bottom:100px;width:250px}.section-shell{padding-left:22px;padding-right:22px}.collection{padding-top:57px;padding-bottom:25px}.section-heading{display:block;margin-bottom:24px}.section-kicker{font-size:8px;margin-bottom:16px}h2{font-size:32px;letter-spacing:-1.3px}.section-description{font-size:11px;margin-top:17px;max-width:100%}.showcase-grid{grid-template-columns:1fr;gap:15px}.showcase{height:320px;padding:20px}.surface-examples{margin-top:41px;max-width:360px}.notification strong{font-size:11px}.notification p{font-size:9px}.notification-inner{padding:20px 16px;gap:12px}.notification-icon{width:36px;height:36px}.showcase-footer h3{font-size:14px}.showcase-footer p{font-size:10px}.mini-recorder-stage{margin-top:41px;max-width:390px}.feature-strip{grid-template-columns:1fr;padding:29px 3px 0;gap:20px}.feature-strip>div{gap:15px}.feature-strip strong{font-size:11px}.feature-strip small{font-size:10px}.integration{grid-template-columns:1fr;gap:27px;padding-top:38px;padding-bottom:50px}.integration-copy{padding-top:0}.integration-copy h2{font-size:36px}.integration-copy>p:not(.section-kicker){margin:18px 0 22px;font-size:11px}.readme-link{margin-bottom:18px}.code-tabs{padding:13px}.code-tabs button{font-size:9px;padding:7px 10px}pre{padding:23px 18px;font-size:9px;min-height:240px}.code-card-footer{padding:14px 18px;font-size:7px}.site-footer{margin:0 22px;padding:24px 0;flex-wrap:wrap;gap:20px}.site-footer p{font-size:9px}.site-footer>span{width:100%;font-size:7px;justify-content:space-between}.footer-brand{font-size:19px}.footer-spark{font-size:16px}}
 @media(prefers-reduced-motion:reduce){:root{scroll-behavior:auto}.scene{transition:none}}
 
+/* Full-page scenes share the recorder's detail layout and controls. */
+.scene-detail .hero{height:auto;min-height:calc(100svh - 76px);max-height:none;padding-bottom:52px}
+.scene-detail .hero-content{max-width:1000px;margin:40px auto 0;padding-bottom:140px}
+.component-stage{width:min(100%,620px);margin:36px auto 0;text-align:left}
+.component-stage.slider-stage{width:min(100%,500px)}
+.portfolio-detail .hero-content{max-width:1280px}
+.component-stage.portfolio-stage{width:min(100%,1100px)}
+.component-stage .scene-preview{display:block;width:100%;border-radius:22px;overflow:hidden;box-shadow:0 28px 60px -22px rgb(4 14 35 / .55)}
+.scene-detail .hero-actions{flex-wrap:wrap}
+.scene-detail .hero-bottomline{left:28px;right:28px;bottom:34px}
+.scene-detail .tuning-panel{right:28px;bottom:110px;z-index:20;max-width:calc(100% - 56px)}
+.scene-detail .under-recorder{right:4.2%;bottom:18px}
+@media(max-width:640px){
+  .scene-detail .hero{min-height:calc(100svh - 64px);padding-bottom:62px}
+  .scene-detail .hero-content{margin-top:35px;padding:0 21px 134px}
+  .component-stage{margin-top:30px}
+  .component-stage .scene-preview{border-radius:16px}
+  .scene-detail .hero-bottomline{left:23px;right:23px}
+  .scene-detail .tuning-panel{right:23px;bottom:100px;max-width:calc(100% - 46px)}
+  .scene-detail .under-recorder{left:23px;right:23px;justify-content:center;flex-wrap:wrap}
+}
+
 /* ---------- Landing page (inspora-like) ---------- */
 .landing{background:#fff;color:#182431}
 .landing .site-header{background:#fff;color:#182431;border-bottom-color:#e5e7eb}
