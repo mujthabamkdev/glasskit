@@ -12,6 +12,7 @@
   <link rel="icon" type="image/svg+xml" href="./assets/mark.svg">
   <script defer src="./dist/liquid-glass.global.js"></script>
   <script type="module" src="/src/ui-cards.js"></script>
+  <script type="module" src="/src/glass-slider.js"></script>
   <style>
     :root{--font-inter:'Inter',ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:light}
     *{box-sizing:border-box}
@@ -74,14 +75,18 @@
     .card-meta{color:rgba(255,255,255,.75);font-size:11px;margin-top:2px}
 
     /* Live recorder card */
-    .card-live{background:linear-gradient(135deg,#eef2ff,#f5f3ff);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;min-height:300px;gap:10px}
-    .card-live liquid-recorder{width:100%;max-width:360px;--recorder-height:140px;--recorder-time-size:50px;--recorder-button-size:90px}
-    .card-live .card-live-label{margin-top:16px;font-size:12px;font-weight:600;color:#4338ca;letter-spacing:-0.01em}
-    .card-live .card-live-sub{font-size:11px;color:#64748b;margin-top:4px;text-align:center}
-    .card-live .card-live-link{margin-top:10px;font-size:11px;font-weight:600;color:#4338ca;text-decoration:none;border:1px solid #c7d2fe;border-radius:999px;padding:6px 12px;transition:all .15s}
-    .card-live .card-live-link:hover{background:#4338ca;color:#fff;border-color:#4338ca}
+    .card-live{background:#f2f5f6;color:#53606b}
+    .recorder-preview{display:grid;place-items:center;min-height:300px;padding:32px 12px;background:linear-gradient(135deg,#eef2ff,#f5f3ff);container-type:inline-size}
+    .card-live liquid-recorder{width:100%;max-width:420px;--recorder-height:140px;--recorder-time-size:50px;--recorder-button-size:90px}
+    @media(min-width:481px){
+      .card-live liquid-recorder{--recorder-button-size:clamp(70px,25cqw,90px)}
+      .card-live liquid-recorder::part(timer){font-size:clamp(24px,calc((100cqw - 190px)/2.8),50px)}
+    }
+    @media(max-width:360px){.recorder-preview{padding-inline:8px}.card-live liquid-recorder{--recorder-button-size:76px}}
     .card-live-ui{background:#f2f5f6;color:#53606b}
     .card-live-ui ui-cards-scene{width:100%}
+    .card-live-slider{background:#f7f7f7;color:#53606b}
+    .card-live-slider glass-slider-scene{width:100%}
     .ui-card-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-top:1px solid #e7ecef}
     .ui-card-footer h2{margin:0;font-size:12px;font-weight:600}
     .ui-card-footer a{font-size:11px;color:#68747e}
@@ -173,9 +178,9 @@
       });
       // Insert the live liquid-recorder card as the FIRST item (only on "all"/"latest")
       if (cat === 'all' || cat === 'latest') {
-        const live = document.createElement('div');
+        const live = document.createElement('article');
         live.className = 'card card-live';
-        live.innerHTML = `<liquid-recorder demo blur="2" refraction="64" elasticity="1.35" download-name="glasskit-recording" style="--recorder-height:140px; --recorder-time-size:50px; --recorder-button-size:90px"></liquid-recorder><p class="card-live-label">Liquid Recorder</p><a class="card-live-link" href="/demo">View original full page ↗</a>`;
+        live.innerHTML = `<div class="recorder-preview"><liquid-recorder demo blur="2" refraction="64" elasticity="1.35" download-name="glasskit-recording"></liquid-recorder></div><div class="ui-card-footer"><h2>Liquid Recorder</h2><a href="/demo">View full page ↗</a></div>`;
         grid.insertBefore(live, grid.firstChild);
       }
       // The second gallery item uses the same rendered scene as the full demo.
@@ -184,6 +189,13 @@
         uiCard.className = 'card card-live-ui';
         uiCard.innerHTML = `<ui-cards-scene preview aria-label="Live UI cards preview"></ui-cards-scene><div class="ui-card-footer"><h2>UI cards</h2><a href="/ui-cards">View full page ↗</a></div>`;
         grid.insertBefore(uiCard, cat === 'motion' ? grid.firstChild : grid.children[1]);
+      }
+      // Keep the glass slider third, with a live scene rather than a sample image.
+      if (cat === 'all' || cat === 'latest' || cat === 'product') {
+        const sliderCard = document.createElement('article');
+        sliderCard.className = 'card card-live-slider';
+        sliderCard.innerHTML = `<glass-slider-scene preview aria-label="Live glass slider preview"></glass-slider-scene><div class="ui-card-footer"><h2>Glass slider experiment</h2><a href="/glass-slider">View full page ↗</a></div>`;
+        grid.insertBefore(sliderCard, cat === 'product' ? grid.firstChild : grid.children[2]);
       }
     }
     render('all');

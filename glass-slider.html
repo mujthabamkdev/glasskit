@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f7">
+  <meta name="description" content="A swipeable glass slider experiment with glossy, morphing orbs.">
+  <title>Glass slider experiment — Glasskit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+  <link rel="icon" type="image/svg+xml" href="/assets/mark.svg">
+  <script type="module" src="/src/glass-slider.js"></script>
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#f7f7f7;color:#4c5863;font-family:Inter,system-ui,sans-serif}
+    body{min-height:100svh;display:grid;grid-template-rows:auto 1fr}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 28px;font-size:12px}
+    a{color:inherit;text-decoration:none}
+    a:hover{color:#111}
+    a:focus-visible{outline:2px solid #626d7d;outline-offset:5px}
+    h1{margin:0;font-size:12px;font-weight:500;color:#7d8790}
+    main{display:grid;place-items:center;min-width:0;padding-bottom:24px}
+    glass-slider-scene{width:min(100%,800px,calc(100svh - 100px))}
+    @media(max-width:640px){header{padding:20px;gap:10px}h1{font-size:10px}glass-slider-scene{width:100%}main{padding-bottom:50px}}
+  </style>
+</head>
+<body>
+  <header><a href="/">← Glasskit</a><h1>Glass slider experiment</h1><a href="https://www.inspora.design/posts/glass-slider-experiment" target="_blank" rel="noopener noreferrer">Reference ↗</a></header>
+  <main><glass-slider-scene aria-label="Interactive glass slider experiment"></glass-slider-scene></main>
+</body>
+</html>
